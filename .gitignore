@@ -1,0 +1,9 @@
+#Code::Blocks files
+*.layout
+*.depend
+*.temp
+
+#directories with object files and binaries
+obj/
+bin/
+
