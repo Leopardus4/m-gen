@@ -84,7 +84,7 @@ _m-gen_ is a simple program which can creates easy-to-use, fast-to-make, and eas
 ## Installation
 
 1. Precompiled binaries:
-    - download executables from [RELEASE page](http//https://github.com/Leopardus4/m-gen/releases) for your system
+    - download executables from [RELEASE page](https://github.com/Leopardus4/m-gen/releases) for your system
 
     - just copy m-gen to directory in PATH:
 

@@ -19,8 +19,9 @@
 
 
 # Select your compiler (uncomment)
-#COMPILER := cc
-COMPILER := gcc
+COMPILER := cc
+#COMPILER := gcc
+#COMPILER := i686-w64-mingw32-gcc-win32
 #COMPILER :=
 # others...
 
@@ -51,9 +52,9 @@ COWSAY := cowsay
 
 # directories
 
-OBJDIR := obj
+OBJDIR := obj/$(COMPILER)
 
-BINDIR := bin
+BINDIR := bin/$(COMPILER)
 
 INSTALLPATH := /usr/local/bin/
 

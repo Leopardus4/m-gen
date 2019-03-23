@@ -1,7 +1,7 @@
 /*
-File:		avr.c
-Project:	m-gen
-Version:	1.0
+File:       avr.c
+Project:    m-gen
+Version:    1.0
 
 Copyright (C) 2019 leopardus
 

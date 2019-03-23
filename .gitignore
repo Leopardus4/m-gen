@@ -7,3 +7,6 @@
 obj/
 bin/
 
+# my files
+X_*
+

@@ -2,9 +2,9 @@
 #define GM_COMMON_H
 
 /*
-File:		gm-common.h
-Project:	m-gen
-Version:	1.0
+File:       gm-common.h
+Project:    m-gen
+Version:    1.0
 
 Copyright (C) 2019 leopardus
 
@@ -37,4 +37,4 @@ void strToLower(char* str);
 
 
 
-#endif	// GM_COMMON_H
+#endif  // GM_COMMON_H

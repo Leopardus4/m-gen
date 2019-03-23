@@ -1,7 +1,7 @@
 /*
-File:		gm-utils.c
-Project:	m-gen
-Version:	1.0
+File:       gm-utils.c
+Project:    m-gen
+Version:    1.0
 
 Copyright (C) 2019 leopardus
 
@@ -94,13 +94,13 @@ int fileExist(const char* filename)
 {
     FILE* fp = fopen(filename, "r");
 
-	if(fp != NULL)
-	{
-		fclose(fp);
-		return 1;
-	}
+    if(fp != NULL)
+    {
+        fclose(fp);
+        return 1;
+    }
 
-	else
+    else
         return 0;
 }
 
@@ -160,7 +160,7 @@ Funcion finds given section (sectionLetter) (in format $x)
     in given file (read permission required),
     sets position in file to start of this sections (after '$' and sectionLetter)
     and additionally returns this position
-    	or -1 in case of error.
+        or -1 in case of error.
 */
 long findSection(FILE* fp, char sectionLetter)
 {

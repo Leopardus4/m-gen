@@ -2,9 +2,9 @@
 #define GM_H
 
 /*
-File:		gm.h
-Project:	m-gen
-Version:	1.0
+File:       gm.h
+Project:    m-gen
+Version:    1.0
 
 Copyright (C) 2019 leopardus
 
@@ -95,9 +95,9 @@ This structure contains attributes and pointers to functions for one specific ta
 */
 typedef struct{
 
-		//some informations about target
-	char description[DESCRIPTION_LENGTH];
-	
+        //some informations about target
+    char description[DESCRIPTION_LENGTH];
+    
         // functions pointers
     void    (*init)     (FILE* fp, const TARGET_FLAGS* fls);
     int     (*macroGen) (FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls);
@@ -139,7 +139,7 @@ void (*getData)(TARGET_ATTRIBUTES* atrs);    //pointerto target's initializer
 for slow program ha ha
 */
 #ifdef __WIN32
-  #include <Windows.h>
+  #include <windows.h>
 
   #define sleep(seconds) Sleep(1000 * (seconds))
 
