@@ -33,8 +33,8 @@ _m-gen_ is a simple program which can creates easy-to-use, fast-to-make, and eas
         $m
         (This is main part of file. Here you should write your prototypes of macros - at the end of file you should see full instruction. Example :
         Mode PORT PIN Name Comment
-        o   B   2   74HC59X_data1 Serial data input (8 bit mode)
-        o   B   3   74HC59X_clk   Serial clock input
+        o   B   2   HC59X_data1 Serial data input (8 bit mode)
+        o   B   3   HC59X_clk   Serial clock input
         b   D   5   userButton1   Button on PCB
 
 
@@ -60,12 +60,11 @@ _m-gen_ is a simple program which can creates easy-to-use, fast-to-make, and eas
         	  Serial data input (8 bit mode)
         */
         
-        #define 74HC59X_data1_dirOut()     do{DDRB |= (1<<PB2);} while(0)
+        #define HC59X_data1_dirOut()     do{DDRB |= (1<<PB2);} while(0)
         
+        #define HC59X_data1_setHigh()    do{PORTB |= (1<<PB2);} while(0)
         
-        #define 74HC59X_data1_setHigh()    do{PORTB |= (1<<PB2);} while(0)
-        
-        #define 74HC59X_data1_setLow()     do{PORTB &= ~(1<<PB2);} while(0)
+        #define HC59X_data1_setLow()     do{PORTB &= ~(1<<PB2);} while(0)
         
         
         //------------------------------------------------------------------------//

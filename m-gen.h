@@ -2,17 +2,17 @@
 #define GM_H
 
 /*
-File:       gm.h
+File:       m-gen.h
 Project:    m-gen
 Version:    1.0
 
 Copyright (C) 2019 leopardus
 
-This file is part of m-gen 
+This file is part of m-gen
     https://github.com/Leopardus4/m-gen
 
 m-gen is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License version 3, 
+it under the terms of the GNU General Public License version 3,
 as published by the Free Software Foundation.
 
 m-gen is distributed in the hope that it will be useful,
@@ -21,7 +21,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-with m-gen. If not, see 
+with m-gen. If not, see
     http://www.gnu.org/licenses/
 
 
@@ -64,7 +64,7 @@ Flags for target module - for future use
 typedef struct{
 
     bool thisFlagDoesNothing;
-    
+
 } TARGET_FLAGS;
 
 /*
@@ -76,7 +76,7 @@ typedef struct{
     bool showVersion;
     bool init;
     bool otherName;
-    
+
     TARGET_FLAGS targetFlags;
 
     TARGETS target;
@@ -97,7 +97,7 @@ typedef struct{
 
         //some informations about target
     char description[DESCRIPTION_LENGTH];
-    
+
         // functions pointers
     void    (*init)     (FILE* fp, const TARGET_FLAGS* fls);
     int     (*macroGen) (FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls);

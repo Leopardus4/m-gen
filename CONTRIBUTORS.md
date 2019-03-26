@@ -88,7 +88,7 @@ How to add new target:
 
     - myTarget_generateMacros()
         
-        - FILE* inFp - file created by init() but onlywith read permission.
+        - FILE* inFp - file created by init() but only with read permission.
             (position is set AFTER '$m" but BEFORE '\n' character)
        
         - FILE* outFp - output file .h - function should write macros to this file
@@ -102,8 +102,7 @@ How to add new target:
         
         - this function should read data from input file and convert it into macros in output file.
             Macros should use IDENTICALL syntax as macros for other targets. If it's impossible, please contact me. 
-        
-        - 
+
 
     - myTarget_help()
         

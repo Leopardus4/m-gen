@@ -5,11 +5,11 @@ Version:    1.0
 
 Copyright (C) 2019 leopardus
 
-This file is part of m-gen 
+This file is part of m-gen
     https://github.com/Leopardus4/m-gen
 
 m-gen is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License version 3, 
+it under the terms of the GNU General Public License version 3,
 as published by the Free Software Foundation.
 
 m-gen is distributed in the hope that it will be useful,
@@ -18,7 +18,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-with m-gen. If not, see 
+with m-gen. If not, see
     http://www.gnu.org/licenses/
 
 
@@ -138,15 +138,15 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
     int macrosNum = 0;
 
 
-    //tablice przechowujące podane przez użytkownika nazwy
-    char _mode[3];
-    char _port[6];       //symbol portu, dla AVR będzie to np. "PORTB" lub krócej: "B"
-    char _pin[4];        //numer pinu w danym porcie, dla AVR np. dla pinu PB2 będzie to "PB2" lub krócej "2"
+    //data from input file
+    char _mode[3];      // input / output / ...
+    char _port[6];      // PORT name (i. e. PORTB or short form: 'B')
+    char _pin[4];       // PIN nr - i. e. PB3 or '3'
 
-    char mode, port, pin;
+    char mode, port, pin;   //as previous, but after conversion to one letter
 
-    char name[128];   //symboliczna nazwa pinu, np. LED4 - nie dłuższa niż 50 znaków
-    char comment[512];    //objaśnienie dot. pinu, w stylu: służy do sygnalizacji tego i tego - nie dłuższy niż 500 znaków
+    char name[128];         //symbolic name of pin (defined by user)
+    char comment[512];      //user comment about function of pin
 
 
     // one 'Enter' , and
@@ -162,7 +162,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if( 4 != fscanf(inFp, " %2s %5s %3s %127s", _mode, _port, _pin, name))
         {
-            fprintf(stderr, "Access error\n");
+            fprintf(stderr, "Error: input file cannot be correctly read\n");
             return -1;
         }
 
@@ -178,7 +178,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if(fgets(comment, sizeof(comment), inFp) == NULL)
         {
-            fprintf(stderr, "Access error\n");
+            fprintf(stderr, "Error: input file cannot be correctly read\n");
             return -1;
         }
 
@@ -252,7 +252,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
 
 /*
-Very ugly function...
+Ugly function...
 */
 int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char* comment)
 {
@@ -353,7 +353,7 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
             return 1;
     }
 
-    // tylko pozycjonowanie
+    // for better look
     fprintf(outFp, "\n//------------------------------------------------------------------------//\n\n");
 
     return 0;

@@ -1,5 +1,5 @@
 /*
-File:       gm.c
+File:       m-gen.c
 Project:    m-gen
 Version:    1.0
 

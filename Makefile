@@ -89,10 +89,13 @@ PROGRAM := m-gen
 
 
 
+_OBJS := $(MAIN).o $(COMMON).o $(UTIL).o $(TARGETS_O)
+OBJS := $(_OBJS:%=$(OBJDIR)/%)
 
 
-OBJS := $(MAIN).o $(COMMON).o $(UTIL).o $(TARGETS_O)
 
+#ADDITIONAL FLAGS GET FORM COMMAND LINE (i.e. by 'make all CFLAGS_COMMAND_LINE=-...' )
+CFLAGS_COMMAND_LINE :=
 
 
 # compiler flags
@@ -101,11 +104,14 @@ CFLAGS := 	-Wall			\
 			-std=c99		\
 			-I$(TARGETDIR)	\
 			-I.				\
+			$(CFLAGS_COMMAND_LINE)
+
+
 
 
 
 # linker flags
-LFLAGS :=
+LFLAGS :=	$(CFLAGS)
 
 
 
@@ -124,7 +130,7 @@ salad_without_chicken:
 
 # general routine
 
-all: create_dirs build
+all: create_dirs $(BINDIR)/$(PROGRAM)
 
 
 create_dirs:
@@ -133,32 +139,36 @@ create_dirs:
 
 
 
-build: $(OBJS)
-	$(COMPILER) $(LFLAGS) $(OBJS:%.o=$(OBJDIR)/%.o) -o $(BINDIR)/$(PROGRAM)
+$(BINDIR)/$(PROGRAM): $(OBJS)
+	$(COMPILER) $(LFLAGS) $^ -o $@
+
 
 
 # main file compilation
 
-$(MAIN).o: $(MAIN).c $(MAIN).h $(UTIL).h $(COMMON).h $(TARGETS_H)
-	$(COMPILER) -c $(CFLAGS) $< -o $(OBJDIR)/$@
+$(OBJDIR)/$(MAIN).o: $(MAIN).c $(MAIN).h $(UTIL).h $(COMMON).h $(TARGETS_H)
+	$(COMPILER) -c $(CFLAGS) $< -o $@
+
 
 
 # UTIL file compilation
 
-$(UTIL).o: $(UTIL).c $(UTIL).h $(MAIN).h
-	$(COMPILER) -c $(CFLAGS) $< -o $(OBJDIR)/$@
+$(OBJDIR)/$(UTIL).o: $(UTIL).c $(UTIL).h $(MAIN).h
+	$(COMPILER) -c $(CFLAGS) $< -o $@
+
 
 
 # COMMON file compilation
 
-$(COMMON).o: $(COMMON).c $(COMMON).h $(MAIN).h
-	$(COMPILER) -c $(CFLAGS) $< -o $(OBJDIR)/$@
+$(OBJDIR)/$(COMMON).o: $(COMMON).c $(COMMON).h $(MAIN).h
+	$(COMPILER) -c $(CFLAGS) $< -o $@
+
 
 
 # targets files compilation
 
-$(TARGETDIR)/%.o: $(TARGETDIR)/%.c $(TARGETDIR)/%.h $(MAIN).h $(COMMON).h
-	$(COMPILER) -c $(CFLAGS) $< -o $(OBJDIR)/$@
+$(OBJDIR)/$(TARGETDIR)/%.o: $(TARGETDIR)/%.c $(TARGETDIR)/%.h $(MAIN).h $(COMMON).h
+	$(COMPILER) -c $(CFLAGS) $< -o $@
 
 
 
@@ -171,7 +181,7 @@ install: $(BINDIR)/$(PROGRAM)
 
 
 clean:
-	$(RM) $(OBJS:%.o=$(OBJDIR)/%.o)
+	$(RM) $(OBJS)
 	$(RM) $(BINDIR)/$(PROGRAM)
 
 
