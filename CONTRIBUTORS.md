@@ -19,7 +19,7 @@ __But__ if you want to add your improvement to official release:
 How to add new target:
 ======================
 
-- create new files: _file.h_ and _file.c_ (replace name with short name of target)
+- create new files: _file.h_ and _file.c_ in _targets/_ directory (replace name with short name of target)
 
 
 

@@ -56,7 +56,7 @@ _m-gen_ is a simple program which can creates easy-to-use, fast-to-make, and eas
 
         //------------------------------------------------------------------------//
         
-        /* 74HC59X_data1 - PB2 - digital output 
+        /* HC59X_data1 - PB2 - digital output 
         	  Serial data input (8 bit mode)
         */
         

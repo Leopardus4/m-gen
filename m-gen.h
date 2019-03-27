@@ -41,17 +41,18 @@ with m-gen. If not, see
 
 
 /* indexing targets */
-#define HOW_MANY_TARGETS    1      //number of supported targets
+#define HOW_MANY_TARGETS    2      //number of supported targets
 
 #define _AVR    0
-/*  #define _LPC111X    ( ( _AVR ) + 1 )    */
+#define _LPC111X    ( ( _AVR ) + 1 )
 
 
 /* storing names of targets
 */
 typedef enum{
     ANY     = -1,
-    AVR     = _AVR
+    AVR     = _AVR,
+    LPC111X = _LPC111X
 } TARGETS;
 
 

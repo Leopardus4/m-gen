@@ -75,9 +75,9 @@ void avr_init(FILE* fp, const TARGET_FLAGS* fls)
     Format:
 
         $m
-        Mode PORT PIN Comment
+        Mode PORT PIN name Comment
 
-        i   B   4   Exemplary comment...
+        i   B   4   led1   Exemplary comment...
 
         $o
         Some info how to use this sheet (avaiable modes etc... )
