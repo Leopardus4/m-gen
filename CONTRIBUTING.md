@@ -7,19 +7,22 @@ All code is distributed under GPL license (see LICENSE.txt),
 
 __But__ if you want to add your improvement to official release:
 
-- if you want to develop primary parts of program,
-        please contact me ( leopardus3[a]pm.me )
+
+- if you want to develop primary parts of program
+        (i. e. your own idea / or there are a couple of [TODO-s](https://github.com/Leopardus4/m-gen/blob/master/TODO.md))
+        please contact me via GitHub or mail ( leopardus3[a]pm.me - please add a tag [m-gen] in title )
 
 - or if you want to add support for new device (TARGET),
         read following description.
-        In mail with me, please add a tag "[NEW TARGET]" in the topic.
+        In mail with me, please add a tag "[m-gen ~ NEW TARGET]" in the topic.
 
 
 ---
+
 How to add new target:
 ======================
 
-- create new files: _file.h_ and _file.c_ in _targets/_ directory (replace name with short name of target)
+- create new files: _file.h_ and _file.c_ in _targets/_ directory (replace filename with short name of target)
 
 
 
@@ -45,10 +48,11 @@ How to add new target:
 
 ## file .c :
 
-         #include <stdio.h> //and other
+         #include <stdio.h> //and other needed headers
          
          #include "m-gen.h"
          #include "gm-utils.h"  //if needed
+         
          #include "my_new_header.h"
 
 
@@ -60,7 +64,7 @@ How to add new target:
     - myTarget_getData() - should returns pointers to other functions:
 
             {
-            char desc[DESCRIPTION_LENGTH] = "about my target";
+            char desc[DESCRIPTION_LENGTH] = "Short info about my target";
         
             strncpy(atrs->description, desc, DESCRIPTION_LENGTH);
         
@@ -71,6 +75,7 @@ How to add new target:
 
 
     - myTarget_init()
+
         - FILE* fp - pointer to input file with write permission
         
         - const TARGET_FLAGS* fls - pointer to structure with flags - actually empty - only for future compatibility
@@ -91,11 +96,11 @@ How to add new target:
         - FILE* inFp - file created by init() but only with read permission.
             (position is set AFTER '$m" but BEFORE '\n' character)
        
-        - FILE* outFp - output file .h - function should write macros to this file
+        - FILE* outFp - output file (.h) - function should write macros to this file
         
-        -  const TARGET_FLAGS* fls - as in init()
+        - const TARGET_FLAGS* fls - as in init()
         
-        -  returned value:
+        - returned value:
             -  _-1_ in case of error (function should print info about error)
             
             -  or nonnegative number of pins for whose function generated macros

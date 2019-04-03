@@ -10,3 +10,11 @@ bin/
 # my files
 X_*
 
+
+# files from "example/" directory
+*.hex
+*.elf
+*.o
+*_prev.h.txt
+
+

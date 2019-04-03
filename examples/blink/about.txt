@@ -1,0 +1,5 @@
+It's a basic example of m-gen usage.
+
+To change LED1pin - just edit gpiodefs.gm
+
+To compile - run "make all" - there is no need to run "m-gen ..."

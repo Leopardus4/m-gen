@@ -134,7 +134,7 @@ This program is distributed under _GPLv3_ license (see: LICENSE.txt)
 
 - NXP LPC 11xx , 17xx (not yet)
 
-Cannot find your MCU? Nothing wrong, it's easy to add it. See CONTRIBUTORS.md for details.
+Cannot find your MCU? Nothing wrong, it's easy to add it. See CONTRIBUTING.md for details.
 
 
 
