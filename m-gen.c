@@ -27,6 +27,8 @@ with m-gen. If not, see
 
 #include <stdio.h>
 #include <string.h> //strcmp()
+#include <stdarg.h>
+
 
 #include "m-gen.h"
 #include "gm-utils.h"
@@ -57,7 +59,9 @@ void printProgHeader(void);
 
 
 
+/* static variables */
 
+static int silentLevel;
 
 
 
@@ -146,20 +150,20 @@ int main(int argc, char * argv [])
     //initializing targetAttrs structure
     if(flags.target != ANY)
     {
-        if( labels[flags.target].getData == 0)
+        if( labels[flags.target].getData == NULL)
         {
-            fprintf(stderr, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
+            message(FATAL, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
             return 101;
         }
 
 
         labels[flags.target].getData(&targetAttrs);
 
-        if(targetAttrs.help == 0
-           || targetAttrs.init == 0
-           || targetAttrs.macroGen == 0 )
+        if(targetAttrs.help == NULL
+           || targetAttrs.init == NULL
+           || targetAttrs.macroGen == NULL )
         {
-            fprintf(stderr, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
+            message(FATAL, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
             return 101;
         }
     }
@@ -537,11 +541,21 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
 
     //initilalizing attrs structure
+    if(labels[fls->target].getData == NULL)
+    {
+        message(FATAL, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
+
+        retval = 1;
+        goto close_fs;
+    }
+
+
     labels[fls->target].getData(&attrs);
 
-    if(attrs.macroGen == 0)
+
+    if(attrs.macroGen == NULL)
     {
-        fprintf(stderr, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
+        message(FATAL, "%s\n", ERR_MSG_INCOMPLETE_SOURCES);
 
         retval = 1;
         goto close_fs;
@@ -730,6 +744,50 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
 
 
+/*---------------------------------------------------*/
+
+/*---------------------------------------------------*/
+
+/*
+Print message to output
+    level - predefined macro from m-gen.h (i. e. MSG or ERR )
+    format, ... - printf() syntax
+
+*/
+void message(int level, const char* format, ...)
+{
+    va_list args;
+
+
+    const char* prefix[5];
+
+    prefix[MSG]     = P_MSG;
+    prefix[NOTE]    = P_NOTE;
+    prefix[WARN]    = P_WARN;
+    prefix[ERR]     = P_ERR;
+    prefix[FATAL]   = P_FATAL;
+
+    FILE* output = (level == MSG) ? stdout : stderr;
+
+
+
+    if(silentLevel <= level)
+    {
+        va_start(args, format);
+
+
+        fprintf(output, "%s ", prefix[level]);
+
+        vfprintf(output, format, args);
+
+        fflush(output);
+
+
+        va_end(args);
+    }
+
+
+}
 
 /*---------------------------------------------------*/
 

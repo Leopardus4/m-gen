@@ -116,17 +116,47 @@ typedef struct{
 
 typedef struct{
 
-char name[TARGET_NAME_LENGTH];  //short, only lowercase, digits and '_'
+char name[TARGET_NAME_LENGTH];  //short, only lowercase, digits and '-' (instead of '_' and whitespaces)
 
 void (*getData)(TARGET_ATTRIBUTES* atrs);    //pointerto target's initializer
 
 } TARGET_LABEL;
 
 
+/*
+Print message to output
+    level - predefined macro - see below
+    format, ... - printf() syntax
+
+*/
+void message(int level, const char* format, ...);
+
+/*
+Macros for message() - to categorize message value
+
+MSG - printed to stdout
+other - stderr
+*/
+#define MSG     0   /* simple message */
+#define NOTE    1   /* important informations about converting macros */
+#define WARN    2   /* warning - it should not stopped generating macros */
+#define ERR     3   /* error - should be followed by program exit */
+#define FATAL   4   /* used only if program is not complete - i. e. uninitialized function pointers */
 
 
-#define ERR_MSG_INCOMPLETE_SOURCES  "FATAL ERROR: program was compiled from incomplete sources\n\
-\tPlease download latest stable release\n"
+// Prefixes for messages - message() adds it automatically
+#define P_MSG       ""  /* nothing */
+#define P_NOTE      "Note:"
+#define P_WARN      "Warning:"
+#define P_ERR       "Error:"
+#define P_FATAL     "FATAL ERROR:"
+
+
+/*
+
+*/
+#define ERR_MSG_INCOMPLETE_SOURCES  "Program was compiled from incomplete sources\n"\
+"\tPlease download latest stable release\n"
 
 
 /*  (only) for developers, this macro shows which functions were called    */
