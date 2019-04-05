@@ -84,31 +84,11 @@ void lpc111x_init(FILE* fp, const TARGET_FLAGS* fls)
 
     fprintf(fp,
         "Format:                                                            \n"
-        "   Mode: avaiable modes for LPC111x:                               \n"
-        "     digital gpio - i. e. communication with other digital chips   \n"
-        "   i   digital Input                                               \n"
-        "   o   digital Output                                              \n"
-        "   d   Double (in+out)                                             \n"
-        "                                                                   \n"
-        "     other modes:                                                  \n"
-        "   b   Button              - for input buttons / sensors           \n"
-        "          (it uses internal pull-up resistor)                      \n"
-        "   l   active Low output   -  / for transistors / leds etc.        \n"
-        "   h   active High output  - /                                     \n"
-        "                                                                   \n"
         "   PORT:                                                           \n"
         "   LPC port number in format: (i. e.) 'PIO2' or '2'                \n"
         "                                                                   \n"
         "   PIN:                                                            \n"
         "   LPC pin number (in PORT) in format: (i. e.) '4'                 \n"
-        "                                                                   \n"
-        "   Name:                                                           \n"
-        "   Symbolic name for pin (i.e. function in project) without spaces \n"
-        "                                                                   \n"
-        "   Comment:                                                        \n"
-        "   Few words about pin function in project                         \n"
-        "   ( only one line - do not use 'Enter' )                          \n"
-        "                                                                   \n"
         );
 }
 
@@ -119,7 +99,7 @@ void lpc111x_init(FILE* fp, const TARGET_FLAGS* fls)
 //converting array from input file to macros in output file
 int  lpc111x_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 {
-    fprintf(stderr, "Error: LPC111x module is not complete yet!\n");
+    message(ERR, "LPC111x module is not complete yet!\n");
     return -1;
 }
 

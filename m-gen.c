@@ -61,8 +61,12 @@ void printProgHeader(void);
 
 /* static variables */
 
-static int silentLevel;
 
+/* How many informations are printed.
+    selected by '-s' comand line flag,
+    used by message()
+*/
+static int silentLevel = 0;
 
 
 
@@ -71,8 +75,6 @@ static int silentLevel;
 
 int main(int argc, char * argv [])
 {
-    FUNCINFO();
-
 
     int ret_val=0;
 
@@ -137,14 +139,16 @@ int main(int argc, char * argv [])
 
 
 
-    printProgHeader();
-
 
     if(flags.showVersion==true)
     {
         printVersion();
         return 0;
     }
+
+
+
+    printProgHeader();
 
 
     //initializing targetAttrs structure
@@ -156,7 +160,7 @@ int main(int argc, char * argv [])
             return 101;
         }
 
-
+        // calling initializer
         labels[flags.target].getData(&targetAttrs);
 
         if(targetAttrs.help == NULL
@@ -188,7 +192,7 @@ int main(int argc, char * argv [])
             return createInputFile(&flags, &targetAttrs, labels[flags.target].name);
         else
         {
-            fprintf(stderr, "Error: Target not specified\n");
+            message(ERR, "Target not specified\n");
             return 1;
             /* if type of target is not given as parameter, program will return error */
         }
@@ -212,14 +216,14 @@ int main(int argc, char * argv [])
 /* Reading arguments */
 int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] )
 {
-    FUNCINFO();
-
 
     for(int i=1; i<argc; ++i)
     {
+
         if( (strcmp(argv[i], "-h")==0)
               || (strcmp(argv[i], "--help")==0) )
             fls->help = true;
+
 
         else if( (strcmp(argv[i], "-v")==0)
               || (strcmp(argv[i], "--version")==0) )
@@ -232,6 +236,7 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
               || (strcmp(argv[i], "--init")==0) )
             fls->init = true;
 
+
         else if(strcmp(argv[i], "-o")==0)
         {
             fls->otherName = true;
@@ -239,13 +244,14 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
             fls->outputFileName[FILENAME_LENGTH - 1]=0;
         }
 
+
         // 'target' parameter
         else if(strcmp(argv[i], "-t")==0)
         {
 
             if(fls->target != ANY)
             {
-                fprintf(stderr, "Error: target redefined\n");
+                message(ERR, "Target redefined\n");
                 return 1;
             }
 
@@ -259,10 +265,17 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
 
             if(fls->target == ANY)
             {
-                fprintf(stderr, "Error: unknown target: %s\n", argv[i]);
+                message(ERR, "Unknown target: %s\n", argv[i]);
                 return 1;
             }
         }
+
+
+        // 'silent mode' - only errors & warnings will be printed
+        else if(strcmp(argv[i], "-s")==0)
+            silentLevel = 1;
+
+
 
         //Here insert new supported parameters
         // ...
@@ -271,7 +284,7 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
         // Wrong parameter
         else if(argv[i][0] == '-')
             {
-                fprintf(stderr, "Error: unknown parameter: %s\n", argv[i]);
+                message(ERR, "Unknown parameter: %s\n", argv[i]);
                 return 1;
             }
 
@@ -284,7 +297,7 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
                 strncpy(fls->inputFileName, argv[i], (FILENAME_LENGTH - 1) );
             else
             {
-                fprintf(stderr, "Error: too many input files given: %s and %s\n", fls->inputFileName, argv[i]);
+                message(ERR, "Too many input files given: %s and %s\n", fls->inputFileName, argv[i]);
                 return 1;
             }
         }
@@ -302,16 +315,14 @@ This function creates an input file (.gm)
 
 int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* targetname)
 {
-    FUNCINFO();
-
-    printf("Generating file %s\n"
+    message(MSG, "Generating file %s\n"
            "\tTarget: %s\n", fls->inputFileName, targetname);
 
 
 
     if(fls->inputFileName[0] == 0)
     {
-        fprintf(stderr, "Error: please put file name\n");
+        message(ERR, "Please put file name\n");
         return 1;
     }
 
@@ -321,7 +332,7 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
     /* If file already exist, return error */
     if(fileExist(fls->inputFileName))
     {
-        fprintf(stderr, "Error: file '%s' already exist,please change filename\n"
+        message(ERR, "File '%s' already exist,please change filename\n"
             /* "    or use '-f' option (actually not supported)\n" */
             , fls->inputFileName);
 
@@ -385,12 +396,15 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
     (example for AVR)
 
         $m
-        Mode PORT PIN Comment
+        Mode PORT PIN Name Comment
 
-        i   B   4   Exemplary comment...
+        i   B   4   SDATA1 Exemplary comment...
 
         $o
-        Some info how to use this sheet (avaiable modes etc... )
+        Some info how to use this sheet
+        Explanation of $m
+          - MCU-dependent data (port, pin) should be written by called function
+          - other - mode, name, comment - written below
 
     */
 
@@ -400,6 +414,30 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
     /*
     additional informations about *.gm file (at the end of '$o' section)
     */
+
+    //mode of pin
+    fprintf(fp,
+        "\n"
+        "   MODE: type of GPIO. \n");
+
+    printPinModes(fp);
+
+
+    //Name, comment
+    fprintf(fp,
+        "                                                                   \n"
+        "   Name:                                                           \n"
+        "   Symbolic name for pin (i.e. function in project) without spaces \n"
+        "   (up to 120 characters)                                          \n"
+        "                                                                   \n"
+        "   Comment:                                                        \n"
+        "   Few words about pin function in project                         \n"
+        "   ( only one line - do not use 'Enter'; max 500 characters)       \n"
+        "                                                                   \n"
+        );
+
+
+
     fprintf(fp,
         "                                                                   \n"
         "Write some macros and use 'm-gen filename' command                 \n"
@@ -419,7 +457,8 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
 
     fclose(fp);
 
-    printf("Done\n");
+
+    message(MSG, "Done\n");
 
     return 0;
 }
@@ -446,7 +485,7 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
     if(fls->inputFileName[0] == 0)
     {
-        fprintf(stderr, "Error: please put input file name\n");
+        message(ERR, "Please put input file name\n");
         return 1;
     }
 
@@ -460,7 +499,7 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
 
 
-    printf("Generating file %s  from  %s\n", fls->outputFileName, fls->inputFileName);
+    message(MSG, "Generating file %s  from  %s\n", fls->outputFileName, fls->inputFileName);
 
 
 
@@ -503,7 +542,7 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
         if(fls->target != ANY)
         {
-            fprintf(stderr, "Error: Don't use '-t' option\n"
+            message(ERR, "Don't use '-t' option\n"
                 "   ('target' will be read from .gm file).\n");
 
             retval = 1;
@@ -529,7 +568,7 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
         if(fls->target == ANY)
         {
-            fprintf(stderr, "Error: unknown target '%s'\n", targetName);
+            message(ERR, "Unknown target '%s'\n", targetName);
 
             retval = 1;
             goto close_fs;
@@ -537,7 +576,7 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
     }
 
 
-    printf("\tTarget: %s\n", labels[fls->target].name);
+    message(MSG, "\tTarget: %s\n", labels[fls->target].name);
 
 
     //initilalizing attrs structure
@@ -662,9 +701,11 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
     macrosNum = attrs.macroGen(inFp, outFp, &(fls->targetFlags));
 
+
+    //ERROR
     if(macrosNum < 0)
     {
-        fprintf(stderr, "\t(line: %d )\n", getActualLine(inFp));
+        message(ERR, "\t(line: %d )\n", getActualLine(inFp));
         retval = 1;
         goto close_fs;
     }
@@ -729,13 +770,12 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
     // ha ha ha
     for(int i=0; i<3; ++i)
     {
-        printf(".");
-        fflush(stdout);
+        message(MSG, ".");
         sleep(1);
     }
 
 
-    printf(" Done. Macros for %d pins written.\n", macrosNum);
+    message(MSG, " Done. Macros for %d pins written.\n", macrosNum);
 
 
 
@@ -752,6 +792,9 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 Print message to output
     level - predefined macro from m-gen.h (i. e. MSG or ERR )
     format, ... - printf() syntax
+
+Inspired by DebugPrintf() from lpc21isp project
+    https://github.com/capiman/lpc21isp
 
 */
 void message(int level, const char* format, ...)
@@ -771,7 +814,7 @@ void message(int level, const char* format, ...)
 
 
 
-    if(silentLevel <= level)
+    if(level >= silentLevel)
     {
         va_start(args, format);
 
@@ -832,8 +875,13 @@ void help(TARGET_LABEL labels[])
             " \n"
             "   <-o othername>        output file will get name \"othername\". \n"
             "                           When unused, output file will be named \"input_filename.h\". \n"
+            " \n"
+            "   -s                    Silent mode. Basic informations will not be prinnted, only errors.\n"
+            "                           Useful for automatic usage - in makefiles, etc. \n"
             " \n");
 
+
+    // avaiable targets
     {
         TARGET_ATTRIBUTES attrs = {0};
 
@@ -846,6 +894,11 @@ void help(TARGET_LABEL labels[])
             printf("%s\t%s\n\n", labels[i].name, attrs.description);
         }
     }
+
+    //avaiable modes of pin
+    printf("\n" "m-gen creates macros for couple of GPIO modes.\n");
+    printPinModes(stdout);
+
 }
 
 
@@ -854,7 +907,7 @@ void help(TARGET_LABEL labels[])
 void printVersion(void)
 {
 
-    // printProgHeader() is called before printVersion(), so there is no need to print "m-gen vX.XX"
+    printf("\n" "m-gen v%s\n\n", VERSION);
 
     printf("(c) 2019 leopardus \n"
     " \n"
@@ -877,5 +930,5 @@ void printVersion(void)
 
 void printProgHeader(void)
 {
-    printf("\nm-gen v%s\n\n", VERSION);
+    message(MSG, "\nm-gen v%s\n\n", VERSION);
 }

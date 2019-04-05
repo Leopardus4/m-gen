@@ -94,31 +94,11 @@ void avr_init(FILE* fp, const TARGET_FLAGS* fls)
 
     fprintf(fp,
         "Format:                                                            \n"
-        "   Mode: avaiable modes for AVR:                                   \n"
-        "     digital gpio - i. e. communication with other digital chips   \n"
-        "   i   digital Input                                               \n"
-        "   o   digital Output                                              \n"
-        "   d   Double (in+out)                                             \n"
-        "\n"
-        "     other modes:                                                  \n"
-        "   b   Button              - for input buttons / sensors           \n"
-        "          (it uses internal pull-up resistor)                      \n"
-        "   l   active Low output   -  / for transistors / leds etc.        \n"
-        "   h   active High output  - /                                     \n"
-        "                                                                   \n"
         "   PORT:                                                           \n"
         "   AVR port name in format: (i. e.) 'PORTB', 'B', 'portb', or 'b'  \n"
         "                                                                   \n"
         "   PIN:                                                            \n"
         "   AVR pin number (in PORT) in format: (i. e.) 'PB4', '4' or 'pb4' \n"
-        "                                                                   \n"
-        "   Name:                                                           \n"
-        "   Symbolic name for pin (i.e. function in project) without spaces \n"
-        "                                                                   \n"
-        "   Comment:                                                        \n"
-        "   Few words about pin function in project                         \n"
-        "   ( only one line - do not use 'Enter' )                          \n"
-        "                                                                   \n"
         );
 
 }
@@ -162,7 +142,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if( 4 != fscanf(inFp, " %2s %5s %3s %127s", _mode, _port, _pin, name))
         {
-            fprintf(stderr, "Error: input file cannot be correctly read\n");
+            message(ERR, "Input file cannot be correctly read\n");
             return -1;
         }
 
@@ -178,13 +158,13 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if(fgets(comment, sizeof(comment), inFp) == NULL)
         {
-            fprintf(stderr, "Error: input file cannot be correctly read\n");
+            message(ERR, "Input file cannot be correctly read\n");
             return -1;
         }
 
         if(comment[sizeof(comment)-1] == 0)
         {
-            fprintf(stderr, "Error: Too long comment\n");
+            message(ERR, "Too long comment\n");
             return -1;
         }
 
@@ -211,7 +191,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if( ! isalpha(port) )
         {
-            fprintf(stderr, "Error: bad PORT: %c\n", port);
+            message(ERR, "Bad PORT: %c\n", port);
             return -1;
         }
 
@@ -229,7 +209,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if( ! isdigit(pin) )
         {
-            fprintf(stderr, "Error: bad PIN: %c\n", pin);
+            message(ERR, "Bad PIN: %c\n", pin);
             return -1;
         }
 
@@ -349,7 +329,7 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
 
 
         default:
-            fprintf(stderr, "Error: unknown mode: %c\n", mode);
+            message(ERR, "Unknown mode: %c\n", mode);
             return 1;
     }
 
@@ -367,7 +347,7 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
 void avr_help(void)
 {
 
-    printf("AVR help \n"
+    message(MSG, "AVR help \n"
     "\n"
     "Atmel AVR MCUs have some gpio pins.\n"
     "They are grouped into ports (PORTA, PORTB, ...)\n"

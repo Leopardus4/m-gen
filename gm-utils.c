@@ -5,11 +5,11 @@ Version:    1.0
 
 Copyright (C) 2019 leopardus
 
-This file is part of m-gen 
+This file is part of m-gen
     https://github.com/Leopardus4/m-gen
 
 m-gen is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License version 3, 
+it under the terms of the GNU General Public License version 3,
 as published by the Free Software Foundation.
 
 m-gen is distributed in the hope that it will be useful,
@@ -18,7 +18,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-with m-gen. If not, see 
+with m-gen. If not, see
     http://www.gnu.org/licenses/
 
 
@@ -29,6 +29,7 @@ with m-gen. If not, see
 #include <ctype.h>  //toupper()
 
 #include "gm-utils.h"
+#include "m-gen.h"
 
 
 
@@ -183,9 +184,26 @@ long findSection(FILE* fp, char sectionLetter)
         }
     }
 
-    fprintf(stderr, "Error: Cannot find section '$%c' in input file. \n", sectionLetter);
+    message(ERR, "Cannot find section '$%c' in input file. \n", sectionLetter);
     return -1;
 }
 
 
+void printPinModes(FILE* output)
+{
+    fprintf(output,
+        "Avaiable modes of GPIO:                                            \n"
+        "     digital gpio - i. e. communication with other digital chips   \n"
+        "   i   digital Input                                               \n"
+        "   o   digital Output                                              \n"
+        "   d   Double (in+out)                                             \n"
+        "                                                                   \n"
+        "     other modes:                                                  \n"
+        "   b   Button              - for input buttons / sensors           \n"
+        "          (it uses internal pull-up resistor)                      \n"
+        "   l   active Low output   -  / for transistors / leds etc.        \n"
+        "   h   active High output  - /                                     \n"
+        "                                                                   \n"
+        );
+}
 
