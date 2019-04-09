@@ -1,7 +1,7 @@
 /*
 File:       gm-common.c
 Project:    m-gen
-Version:    1.0
+Version:    1.1
 
 Copyright (C) 2019 leopardus
 

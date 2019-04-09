@@ -1,7 +1,7 @@
 /*
 File:       m-gen.c
 Project:    m-gen
-Version:    1.0
+Version:    1.1
 
 Copyright (C) 2019 leopardus
 
@@ -44,18 +44,18 @@ with m-gen. If not, see
 
 /* Function declarations */
 
-int readParameters  (int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[]);
+static int readParameters  (int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[]);
 
-int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* targetname);
+static int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* targetname);
 
-int generateMacros(FLAGS* fls, const TARGET_LABEL labels[]);
+static int generateMacros(FLAGS* fls, const TARGET_LABEL labels[]);
 
 
-void help(TARGET_LABEL labels[]);
+static void help(TARGET_LABEL labels[]);
 
-void printMainPage(void);
-void printVersion(void);
-void printProgHeader(void);
+static void printMainPage(void);
+static void printVersion(void);
+static void printProgHeader(void);
 
 
 
@@ -117,6 +117,11 @@ int main(int argc, char * argv [])
         .showVersion = false,
         .init = false,
         .otherName = false,
+
+
+        //target flags
+        .targetFlags.compatibilityMode = false,
+
 
         .target = ANY,
 
@@ -275,6 +280,10 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
         else if(strcmp(argv[i], "-s")==0)
             silentLevel = 1;
 
+
+        // 'compatibility mode' - some additional macros
+        else if(strcmp(argv[i], "-c")==0)
+            fls->targetFlags.compatibilityMode = true;
 
 
         //Here insert new supported parameters
@@ -471,7 +480,7 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
 
 int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 {
-    char tempFile[] = ".g-men_tmp.tmp";
+    char tempFile[] = ".m_gen_tmp.tmp";
 
     char headerGuard[FILENAME_LENGTH] = {0};
 
@@ -687,9 +696,9 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
     fprintf(outFp, "\n\n\n\n//------------------------------------------------------------------------//\n\n");
 
 
+
     /*
-        Macros and description about usage
-        - proper function is called.
+        Macros - proper function is called.
     */
 
     if(findSection(inFp, 'm') < 0)  //go to '$m' section
@@ -699,18 +708,44 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
     }
 
 
+    /* Checking for modes */
+    if(fls->targetFlags.compatibilityMode == true)
+    {
+        if(attrs.presentModes.compatibilityMode == false)
+            message(NOTE, "%s module doesn't support compatibility mode\n", labels[fls->target].name);
+    }
+
+
+
+
     macrosNum = attrs.macroGen(inFp, outFp, &(fls->targetFlags));
+
+
 
 
     //ERROR
     if(macrosNum < 0)
     {
-        message(ERR, "\t(line: %d )\n", getActualLine(inFp));
+        message(MSG, "\t(line: %d )\n", getActualLine(inFp));
         retval = 1;
         goto close_fs;
     }
 
 
+
+
+    /*
+        "User guide" - macros usage
+    */
+
+    fprintf(outFp, "\n\n" "/*" "\n\n");
+
+    fprintf(outFp, "Description:\n\n");
+
+    printPinMacros(outFp);
+
+    fprintf(outFp, "*/");
+    fprintf(outFp, "\n\n\n\n//------------------------------------------------------------------------//\n\n");
 
 
 
@@ -850,35 +885,43 @@ void printMainPage(void)
 
 void help(TARGET_LABEL labels[])
 {
-    printf ("Usage:\n"
-            "    m-gen file.gm --init -t target \n"
-            "to create empty array in file.gm \n"
-            " \n"
-            "You should write some macro prototypes to this file \n"
-            " \n"
-            "Then use: \n"
-            "    m-gen file.gm [ -o other_name.h ] \n"
-            "to convert it to macros in new .h file. \n"
-            " \n"
-            " [...] - optional \n"
-            " \n"
-            "Options: \n"
-            " \n"
-            "   -v  (or '--version')  show version of program \n"
-            " \n"
-            "   <-t target>           select target (MCU series). See below for available targets. \n"
-            " \n"
-            "   -h  (--help)          this page. Usage <-h -t target> shows help for \"target\" \n"
-            " \n"
-            "   -i  (--init)          creates input file (.gm). If this parameter is not given, \n"
-            "                           m-gen will convert .gm file to .h file with macros \n"
-            " \n"
-            "   <-o othername>        output file will get name \"othername\". \n"
-            "                           When unused, output file will be named \"input_filename.h\". \n"
-            " \n"
-            "   -s                    Silent mode. Basic informations will not be prinnted, only errors.\n"
-            "                           Useful for automatic usage - in makefiles, etc. \n"
-            " \n");
+    printf ("Usage:                                                                                             \n"
+            "    m-gen --init file.gm -t target                                                                 \n"
+            "to create empty array in file.gm                                                                   \n"
+            "                                                                                                   \n"
+            "You should write some macro prototypes to this file.                                               \n"
+            "                                                                                                   \n"
+            "Then use:                                                                                          \n"
+            "    m-gen file.gm [-s] [-c] [ -o other_name.h ]                                                    \n"
+            "to convert it to macros in new .h file.                                                            \n"
+            "                                                                                                   \n"
+            " [...] - optional                                                                                  \n"
+            "                                                                                                   \n"
+            "                                                                                                   \n"
+            "Options:                                                                                           \n"
+            "                                                                                                   \n"
+            "   -v  (or '--version')  Show version of program.                                                  \n"
+            "                                                                                                   \n"
+            "   <-t target>           Select target (MCU series). See below for available targets.              \n"
+            "                                                                                                   \n"
+            "   -h  (--help)          This page. Usage <-h -t target> shows help for \"target\"                 \n"
+            "                                                                                                   \n"
+            "   -i  (--init)          Create input file (.gm). If this parameter is not given,                  \n"
+            "                           m-gen will convert .gm file to .h file with macros                      \n"
+            "                                                                                                   \n"
+            "   <-o othername>        Output file will get name \"othername\".                                  \n"
+            "                           When unused, output file will be named \"input_filename.h\".            \n"
+            "                                                                                                   \n"
+            "   -s                    Silent mode. Basic informations will not be printed, only errors.         \n"
+            "                           Useful for automatic usage - in makefiles, etc.                         \n"
+            "                                                                                                   \n"
+            "   -c                    Compatibility mode. If specified, m-gen will create few additional        \n"
+            "                           empty macros, for compatibility with other MCUs.                        \n"
+            "                           Useful only for high portability.                                       \n"
+            "                                                                                                   \n"
+            "                                                                                                   \n"
+            "                                                                                                   \n"
+            );
 
 
     // avaiable targets
@@ -895,9 +938,13 @@ void help(TARGET_LABEL labels[])
         }
     }
 
-    //avaiable modes of pin
-    printf("\n" "m-gen creates macros for couple of GPIO modes.\n");
+    // avaiable modes of pin
+    printf("\n\n" "m-gen creates macros for couple of GPIO modes.\n");
     printPinModes(stdout);
+
+    // macros created by m-gen
+    printf("\n\n\n\n\n");
+    printPinMacros(stdout);
 
 }
 
@@ -919,9 +966,12 @@ void printVersion(void)
     " \n"
     "You can find source code here: \n"
     "    https://github.com/Leopardus4/m-gen \n"
-    " \n"
-    "\033[107m       \033[0m\n"
-    "\033[101m       \033[0m\n\n");
+    " \n");
+
+    #ifndef __WIN32
+      printf(" \033[107m       \033[0m\n"
+             " \033[101m       \033[0m\n\n");
+    #endif // __WIN32
 
 }
 

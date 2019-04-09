@@ -1,10 +1,10 @@
-#ifndef GM_H
-#define GM_H
+#ifndef M_GEN_H
+#define M_GEN_H
 
 /*
 File:       m-gen.h
 Project:    m-gen
-Version:    1.0
+Version:    1.1
 
 Copyright (C) 2019 leopardus
 
@@ -27,7 +27,7 @@ with m-gen. If not, see
 
 */
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 
 /* boolean : true / false */
@@ -41,7 +41,7 @@ with m-gen. If not, see
 
 
 /* indexing targets */
-#define HOW_MANY_TARGETS    2      //number of supported targets
+#define HOW_MANY_TARGETS    2      /* number of supported targets */
 
 #define _AVR    0
 #define _LPC111X    ( ( _AVR ) + 1 )
@@ -60,11 +60,11 @@ typedef enum{
 
 
 /*
-Flags for target module - for future use
+Flags for target module
 */
 typedef struct{
 
-    bool thisFlagDoesNothing;
+    bool compatibilityMode;
 
 } TARGET_FLAGS;
 
@@ -99,6 +99,10 @@ typedef struct{
         //some informations about target
     char description[DESCRIPTION_LENGTH];
 
+        // supported modes
+        // if module supports any mode, it should set flag to 'true' in target_getdata() function
+    TARGET_FLAGS presentModes;
+
         // functions pointers
     void    (*init)     (FILE* fp, const TARGET_FLAGS* fls);
     int     (*macroGen) (FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls);
@@ -118,9 +122,19 @@ typedef struct{
 
 char name[TARGET_NAME_LENGTH];  //short, only lowercase, digits and '-' (instead of '_' and whitespaces)
 
-void (*getData)(TARGET_ATTRIBUTES* atrs);    //pointerto target's initializer
+void (*getData)(TARGET_ATTRIBUTES* atrs);    //pointer to target's initializer
 
 } TARGET_LABEL;
+
+
+
+/*
+Required size of arrays for symbolic pin name and comment from .gm file
+*/
+#define GM_PINNAME_LENGTH   (128)
+
+#define GM_COMMENT_LENGTH   (512)
+
 
 
 /*
@@ -137,11 +151,11 @@ Macros for message() - to categorize message value
 MSG - printed to stdout
 other - stderr
 */
-#define MSG     0   /* simple message */
-#define NOTE    1   /* important informations about converting macros */
-#define WARN    2   /* warning - it should not stopped generating macros */
-#define ERR     3   /* error - should be followed by program exit */
-#define FATAL   4   /* used only if program is not complete - i. e. uninitialized function pointers */
+#define MSG     (0)   /* simple message */
+#define NOTE    (1)   /* important informations about converting macros */
+#define WARN    (2)   /* warning - it should not stopped generating macros */
+#define ERR     (3)   /* error - should be followed by program exit */
+#define FATAL   (4)   /* used only if program is not complete - i. e. uninitialized function pointers */
 
 
 // Prefixes for messages - message() adds it automatically
@@ -153,16 +167,13 @@ other - stderr
 
 
 /*
-
+Error - if function pointers are not initialized
 */
 #define ERR_MSG_INCOMPLETE_SOURCES  "Program was compiled from incomplete sources\n"\
 "\tPlease download latest stable release\n"
 
 
-/*  (only) for developers, this macro shows which functions were called    */
-//#define FUNCINFO()    printf("\t-+- %s() function\n", __func__)
-/*  When unused, comment it and uncomment following:    */
-#define FUNCINFO()
+
 
 
 
@@ -186,4 +197,4 @@ for slow program ha ha
 
 
 
-#endif // GM_H
+#endif // M_GEN_H

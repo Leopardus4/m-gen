@@ -89,7 +89,7 @@ all: ${PROG}
 # How to use m-gen in Makefile:
 
 ${DEF_HEADER} : ${DEF_ARRAY}
-	${M_GEN} $< -o $@
+	${M_GEN} -s $< -o $@
 
 
 

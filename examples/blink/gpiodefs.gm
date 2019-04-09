@@ -12,6 +12,7 @@ To change gpio to another, edit .gm file and run m-gen
 $m
 Mode PORT PIN Name Comment
 
+b	D	2	MainButton	Big red button on motherboard
 l	D	3	LED1	Torch emulator...
 
 

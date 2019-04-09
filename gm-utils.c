@@ -1,7 +1,7 @@
 /*
 File:       gm-utils.c
 Project:    m-gen
-Version:    1.0
+Version:    1.1
 
 Copyright (C) 2019 leopardus
 
@@ -189,6 +189,8 @@ long findSection(FILE* fp, char sectionLetter)
 }
 
 
+/*---------------------------------------------------*/
+
 void printPinModes(FILE* output)
 {
     fprintf(output,
@@ -206,4 +208,104 @@ void printPinModes(FILE* output)
         "                                                                   \n"
         );
 }
+
+
+/*---------------------------------------------------*/
+
+
+
+void printPinMacros(FILE* output)
+{
+    fprintf(output,
+        "m-gen creates set of macros for each gpio.                 \n"
+        "It depends on gpio mode from .gm file.                     \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        " [ #define gpio_enableAccess() ]                           \n"
+        "       This macro is present only on some platforms.       \n"
+        "       If present, it's used to i. e. turn on gpio clock   \n"
+        "       (it's common for all gpio,                          \n"
+        "        and MUST be used before any other macros)          \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "Macros for 1 pin:  (abc - symbolic pin name from .gm file) \n"
+        "                                                           \n"
+        "digital Input (i):                                         \n"
+        "                                                           \n"
+        "   #define abc_dirIn()     - initializing gpio as input    \n"
+        "                                                           \n"
+        "   #define abc_isHigh()    + testing state of gpio         \n"
+        "                           | i. e.:                        \n"
+        "   #define abc_isLow()     + if( abc_isHigh() ) {code}     \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "digital Output (o):                                        \n"
+        "                                                           \n"
+        "   #define abc_dirOut()    - initializing gpio as output   \n"
+        "                                                           \n"
+        "   #define abc_setHigh()   + changing state of gpio        \n"
+        "                           | (high/low)                    \n"
+        "   #define abc_setLow()    +                               \n"
+        "                                                           \n"
+        "       It's required to use setHigh() or setLow() macro    \n"
+        "       after dirOut(), because state of gpio is unknown.   \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "digital input and output (d):                              \n"
+        "                                                           \n"
+        " [ #define abc_init() ]    - present only on some platforms\n"
+        "       It initializes pin as gpio                          \n"
+        "       (and i. e. disables pull-up)                        \n"
+        "       If present, should be used before any operations    \n"
+        "       on this gpio.                                       \n"
+        "       It's required to use dirIn() or dirOut()            \n"
+        "       after init(), because direction is unknown.         \n"
+        "                                                           \n"
+        "   #define abc_dirIn()     +                               \n"
+        "   #define abc_dirOut()    |   As described above          \n"
+        "                           |                               \n"
+        "   #define abc_isHigh()    |                               \n"
+        "   #define abc_isLow()     |                               \n"
+        "                           |                               \n"
+        "   #define abc_setHigh()   |                               \n"
+        "   #define abc_setLow()    +                               \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "active low / active high output (l/h):                     \n"
+        "  (macros for both are identicall,                         \n"
+        "   so it's possible to exchange them)                      \n"
+        "                                                           \n"
+        "   #define abc_asOutput()  - initializing gpio as output   \n"
+        "                             and changing state to 'Off'   \n"
+        "                                                           \n"
+        "   #define abc_On()        - changing state of gpio        \n"
+        "                             to turn 'On' actuator         \n"
+        "                                                           \n"
+        "   #define abc_Off()       - changing state of gpio        \n"
+        "                             to turn 'Off' actuator        \n"
+        "                                                           \n"
+        "                                                           \n"
+        "                                                           \n"
+        "active low input with internal pull-up resistor (b):       \n"
+        "                                                           \n"
+        "   #define abc_asInput()   - initializing gpio as input    \n"
+        "                             and turning on pull-up        \n"
+        "                                                           \n"
+        "   #define abc_isActive()  - checking if sensor is active  \n"
+        "                             i. e.:                        \n"
+        "                             if( abc_isActive() ) {code}   \n"
+        "                                                           \n"
+        "   #define abc_isInactive()- checking if sensor is inactive\n"
+        "                                                           \n"
+        "                                                           \n"
+        );
+
+}
+
 

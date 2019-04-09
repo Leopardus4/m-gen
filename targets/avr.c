@@ -1,7 +1,7 @@
 /*
 File:       avr.c
 Project:    m-gen
-Version:    1.0
+Version:    1.1
 
 Copyright (C) 2019 leopardus
 
@@ -41,8 +41,8 @@ with m-gen. If not, see
 #include "avr.h"
 
 
-//declaration
-int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char* comment);
+//local function - prints macros for one pin
+static int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char* comment, const TARGET_FLAGS* fls);
 
 
 
@@ -58,6 +58,8 @@ void avr_getData(TARGET_ATTRIBUTES* atrs)
     atrs->help      =  &avr_help;
     atrs->init      =  &avr_init;
     atrs->macroGen  =  &avr_generateMacros;
+
+    atrs->presentModes.compatibilityMode = true;
 }
 
 
@@ -67,7 +69,6 @@ void avr_getData(TARGET_ATTRIBUTES* atrs)
 
 void avr_init(FILE* fp, const TARGET_FLAGS* fls)
 {
-    FUNCINFO();
 
     /*
     Creating macros section and 'other' section for AVR.
@@ -113,7 +114,6 @@ void avr_init(FILE* fp, const TARGET_FLAGS* fls)
 
 int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 {
-    FUNCINFO();
 
     int macrosNum = 0;
 
@@ -125,14 +125,33 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
     char mode, port, pin;   //as previous, but after conversion to one letter
 
-    char name[128];         //symbolic name of pin (defined by user)
-    char comment[512];      //user comment about function of pin
+    char name[GM_PINNAME_LENGTH];         //symbolic name of pin (defined by user)
+    char comment[GM_COMMENT_LENGTH];      //user comment about function of pin
+
 
 
     // one 'Enter' , and
     // first line - heading - unwanted
     fgets(comment, sizeof(comment), inFp);
     fgets(comment, sizeof(comment), inFp);
+
+
+    // compatibility mode - empty macro
+
+    if(fls->compatibilityMode == true)
+    {
+        fprintf(outFp,  "\n\n"
+                        "/* gpio_enableAccess() - empty macro \n"
+                        "   Used only for compatibility with other MCUs\n"
+                        "   ( configured by 'm-gen -c' flag )\n"
+                        " */\n\n");
+
+        fprintf(outFp, "#define gpio_enableAccess()\n\n");
+
+        fprintf(outFp, "\n//------------------------------------------------------------------------//\n\n");
+
+    }
+
 
 
 
@@ -142,17 +161,24 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
         if( 4 != fscanf(inFp, " %2s %5s %3s %127s", _mode, _port, _pin, name))
         {
-            message(ERR, "Input file cannot be correctly read\n");
-            return -1;
+            // end of section
+            if(_mode[0] == '$')
+                break;
+
+            else
+            {
+                message(ERR, "Input file cannot be correctly read\n");
+                return -1;
+            }
         }
 
-        //end of section
+
+        // end of section
         if(_mode[0] == '$')
             break;
 
 
-
-        // Comment
+        // comment
 
         comment[sizeof(comment)-1] = 1;
 
@@ -215,7 +241,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 
 
 
-        if( avr_printMacro(outFp, mode, port, pin, name, comment) )
+        if( avr_printMacro(outFp, mode, port, pin, name, comment, fls) )
             return -1;
 
         ++macrosNum;
@@ -229,12 +255,12 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 }
 
 
-
+/*---------------------------------------------------*/
 
 /*
 Ugly function...
 */
-int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char* comment)
+int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char* comment, const TARGET_FLAGS* fls)
 {
 
     switch (mode)
@@ -245,9 +271,9 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
             fprintf(outFp, "#define %s_dirIn()      do{DDR%c &= ~(1<<P%c%c); PORT%c &= ~(1<<P%c%c);} while(0)\n\n", name, port, port, pin, port, port, pin);
 
 
-            fprintf(outFp, "#define %s_isHigh()     ( (PIN%c & (1<< P%c%c)) != 0 )\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isHigh()     ( (PIN%c & (1<<P%c%c)) != 0 )\n\n", name, port, port, pin);
 
-            fprintf(outFp, "#define %s_isLow()      ( (PIN%c & (1<< P%c%c)) == 0 )\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isLow()      ( (PIN%c & (1<<P%c%c)) == 0 )\n\n", name, port, port, pin);
 
             break;
 
@@ -268,14 +294,19 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
         case 'd':   //Input and output
             fprintf(outFp, "/* %s - P%c%c - digital input and output \n\t %s */\n\n", name, port, pin, comment);
 
+
+            if(fls->compatibilityMode == true)  // only if '-c' command line parameter was specified
+                fprintf(outFp, "#define %s_init()\n\n", name);
+
+
             fprintf(outFp, "#define %s_dirIn()      do{DDR%c &= ~(1<<P%c%c); PORT%c &= ~(1<<P%c%c);} while(0)\n\n", name, port, port, pin, port, port, pin);
 
             fprintf(outFp, "#define %s_dirOut()     do{DDR%c |= (1<<P%c%c);} while(0)\n\n\n", name, port, port, pin);
 
 
-            fprintf(outFp, "#define %s_isHigh()     ( (PIN%c & (1<< P%c%c)) != 0 )\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isHigh()     ( (PIN%c & (1<<P%c%c)) != 0 )\n\n", name, port, port, pin);
 
-            fprintf(outFp, "#define %s_isLow()      ( (PIN%c & (1<< P%c%c)) == 0 )\n\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isLow()      ( (PIN%c & (1<<P%c%c)) == 0 )\n\n\n", name, port, port, pin);
 
 
             fprintf(outFp, "#define %s_setHigh()    do{PORT%c |= (1<<P%c%c);} while(0)\n\n", name, port, port, pin);
@@ -316,14 +347,14 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
 
 
         case 'b':   //Button type - active low input with internall pull-up
-            fprintf(outFp, "/* %s - P%c%c - active low input with internal pull-up \n\t %s */\n\n", name, port, pin, comment);
+            fprintf(outFp, "/* %s - P%c%c - active low input with internal pull-up resistor \n\t %s */\n\n", name, port, pin, comment);
 
             fprintf(outFp, "#define %s_asInput()    do{DDR%c &= ~(1<<P%c%c); PORT%c |= (1<<P%c%c);} while(0)\n\n", name, port, port, pin, port, port, pin);
 
 
-            fprintf(outFp, "#define %s_isActive()   ( (PIN%c & (1<< P%c%c)) == 0 )\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isActive()   ( (PIN%c & (1<<P%c%c)) == 0 )\n\n", name, port, port, pin);
 
-            fprintf(outFp, "#define %s_isInactive() ( (PIN%c & (1<< P%c%c)) != 0 )\n\n", name, port, port, pin);
+            fprintf(outFp, "#define %s_isInactive() ( (PIN%c & (1<<P%c%c)) != 0 )\n\n", name, port, port, pin);
 
             break;
 
