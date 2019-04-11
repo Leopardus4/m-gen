@@ -79,6 +79,8 @@ _m-gen_ is a simple program which can creates easy-to-use, fast-to-make, and eas
     copy prototypes from previous file and replace only chip-dependent elements (port, pin).
 
 
+- For more informations, see _m-gen --help_
+
 
 ## Installation
 
@@ -132,7 +134,9 @@ This program is distributed under _GPLv3_ license (see: LICENSE.txt)
 
 - Atmel AVR family (ATtiny & ATmega)
 
-- NXP LPC 11xx , 17xx (not yet)
+- NXP LPC 111x (ARM Cortex M0 based)
+
+- 17xx (not yet)
 
 Cannot find your MCU? Nothing wrong, it's easy to add it. See CONTRIBUTING.md for details.
 
