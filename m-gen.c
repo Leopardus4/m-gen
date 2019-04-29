@@ -122,6 +122,8 @@ int main(int argc, char * argv [])
         //target flags
         .targetFlags.compatibilityMode = false,
 
+        .targetFlags.inlineFunc = false,
+
 
         .target = ANY,
 
@@ -284,6 +286,14 @@ int readParameters( int argc, char * argv [], FLAGS* fls, TARGET_LABEL labels[] 
         // 'compatibility mode' - some additional macros
         else if(strcmp(argv[i], "-c")==0)
             fls->targetFlags.compatibilityMode = true;
+
+
+
+        // 'inline' mode - creating 'static inline' functions
+        else if( (strcmp(argv[i], "-I")==0)
+              || (strcmp(argv[i], "--inline")==0) )
+            fls->targetFlags.inlineFunc = true;
+
 
 
         //Here insert new supported parameters
@@ -480,6 +490,10 @@ int createInputFile(const FLAGS* fls, const TARGET_ATTRIBUTES* atr, const char* 
 
 int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 {
+    /* This file will be used to store changes.
+    If process fails, tmpfile will be deleted
+    (If previous output file already exist, it wouldn't be deleted).
+    */
     char tempFile[] = ".m_gen_tmp.tmp";
 
     char headerGuard[FILENAME_LENGTH] = {0};
@@ -586,6 +600,8 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
 
     message(MSG, "\tTarget: %s\n", labels[fls->target].name);
+
+
 
 
     //initilalizing attrs structure
@@ -709,15 +725,26 @@ int generateMacros(FLAGS* fls, const TARGET_LABEL labels[])
 
 
     /* Checking for modes */
+
+    // compatibility mode
     if(fls->targetFlags.compatibilityMode == true)
     {
         if(attrs.presentModes.compatibilityMode == false)
             message(NOTE, "%s module doesn't support compatibility mode\n", labels[fls->target].name);
     }
 
+    // inline functions
+    if(fls->targetFlags.inlineFunc == true)
+    {
+        if(attrs.presentModes.inlineFunc == false)
+            message(NOTE, "%s module doesn't support inline functions\n"
+                          "\tIt will generate #defines\n", labels[fls->target].name);
+    }
 
 
 
+
+    // function from proper target module
     macrosNum = attrs.macroGen(inFp, outFp, &(fls->targetFlags));
 
 
@@ -918,6 +945,9 @@ void help(TARGET_LABEL labels[])
             "   -c                    Compatibility mode. If specified, m-gen will create few additional        \n"
             "                           empty macros, for compatibility with other MCUs.                        \n"
             "                           Useful only for high portability.                                       \n"
+            "                                                                                                   \n"
+            "   -I  (--inline)        'inline' mode. Creating 'static inline' functions instead of #defines     \n"
+            "                                                                                                   \n"
             "                                                                                                   \n"
             "                                                                                                   \n"
             "                                                                                                   \n"

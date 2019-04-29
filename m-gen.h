@@ -64,7 +64,11 @@ Flags for target module
 */
 typedef struct{
 
+    // creating additional empty macros
     bool compatibilityMode;
+
+    // creating 'static inline' functions instead of #defines
+    bool inlineFunc;
 
 } TARGET_FLAGS;
 
