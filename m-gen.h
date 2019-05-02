@@ -141,6 +141,29 @@ Required size of arrays for symbolic pin name and comment from .gm file
 
 
 
+
+
+
+/*
+for slow program ha ha
+*/
+#ifdef __WIN32
+  #include <windows.h>
+
+  #define sleep(seconds) Sleep(1000 * (seconds))
+
+#elif defined __unix__
+  #include <unistd.h>
+
+#else
+  #define sleep(seconds)
+        //do nothing
+
+#endif // __WIN32 / __unix__
+
+
+
+
 /*
 Print message to output
     level - predefined macro - see below
@@ -164,10 +187,10 @@ other - stderr
 
 // Prefixes for messages - message() adds it automatically
 #define P_MSG       ""  /* nothing */
-#define P_NOTE      "Note:"
-#define P_WARN      "Warning:"
-#define P_ERR       "Error:"
-#define P_FATAL     "FATAL ERROR:"
+#define P_NOTE      "Note: "
+#define P_WARN      "Warning: "
+#define P_ERR       "Error: "
+#define P_FATAL     "FATAL ERROR: "
 
 
 /*
@@ -176,27 +199,6 @@ Error - if function pointers are not initialized
 #define ERR_MSG_INCOMPLETE_SOURCES  "Program was compiled from incomplete sources\n"\
 "\tPlease download latest stable release\n"
 
-
-
-
-
-
-/*
-for slow program ha ha
-*/
-#ifdef __WIN32
-  #include <windows.h>
-
-  #define sleep(seconds) Sleep(1000 * (seconds))
-
-#elif defined __unix__
-  #include <unistd.h>
-
-#else
-  #define sleep(seconds)
-        //do nothing
-
-#endif // __WIN32 / __unix__
 
 
 

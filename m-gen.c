@@ -881,7 +881,7 @@ void message(int level, const char* format, ...)
         va_start(args, format);
 
 
-        fprintf(output, "%s ", prefix[level]);
+        fprintf(output, "%s", prefix[level]);
 
         vfprintf(output, format, args);
 
@@ -919,7 +919,7 @@ void help(TARGET_LABEL labels[])
             "You should write some macro prototypes to this file.                                               \n"
             "                                                                                                   \n"
             "Then use:                                                                                          \n"
-            "    m-gen file.gm [-s] [-c] [ -o other_name.h ]                                                    \n"
+            "    m-gen file.gm [-s] [-c] [-I] [ -o other_name.h ]                                               \n"
             "to convert it to macros in new .h file.                                                            \n"
             "                                                                                                   \n"
             " [...] - optional                                                                                  \n"
