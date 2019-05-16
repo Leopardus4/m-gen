@@ -66,6 +66,10 @@
 		<Unit filename="targets/lpc111x.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="targets/lpc17xx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="targets/lpc17xx.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

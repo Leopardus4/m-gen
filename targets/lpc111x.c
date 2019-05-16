@@ -89,7 +89,7 @@ void lpc111x_init(FILE* fp, const TARGET_FLAGS* fls)
 
     fprintf(fp, "$m" "\n");
     fprintf(fp, "Mode PORT PIN Name Comment\n\n");
-    fprintf(fp, "l\t" "2\t" "4\t" "led_status\t" "Write here your own macros...\n\n");
+    fprintf(fp, "l   2   4   led_status    Write here your own macros...\n\n");
 
 
     fprintf(fp, "$o" "\n");

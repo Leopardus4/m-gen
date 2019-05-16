@@ -138,7 +138,8 @@ How to add new target:
     
     - _compatibilityMode_ - creating full set of macros (if it's no need to use specific macro, it should be created as empty macro)
         See _m-gen --help_ for details.
-    
+
+    - _inlineFunc_ - 'inline' mode - creating 'static inline' functions instead of #defines
 
 
 

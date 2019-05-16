@@ -27,7 +27,7 @@ with m-gen. If not, see
 
 */
 
-#define VERSION "1.1"
+#define VERSION "1.2"
 
 
 /* boolean : true / false */
@@ -41,10 +41,11 @@ with m-gen. If not, see
 
 
 /* indexing targets */
-#define HOW_MANY_TARGETS    2      /* number of supported targets */
+#define HOW_MANY_TARGETS    3      /* number of supported targets */
 
 #define _AVR    0
-#define _LPC111X    ( ( _AVR ) + 1 )
+#define _LPC111X    ( ( _AVR )      + 1 )
+#define _LPC17XX    ( ( _LPC111X )  + 1 )
 
 
 /* storing names of targets
@@ -52,7 +53,8 @@ with m-gen. If not, see
 typedef enum{
     ANY     = -1,
     AVR     = _AVR,
-    LPC111X = _LPC111X
+    LPC111X = _LPC111X,
+    LPC17XX = _LPC17XX
 } TARGETS;
 
 

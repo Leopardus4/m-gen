@@ -141,12 +141,12 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
     if(fls->compatibilityMode == true)
     {
         fprintf(outFp,  "\n\n"
-                        "/* gpio_enableAccess() - empty macro \n"
+                        "/* gpio_enableAccess() - empty macro\n"
                         "   Used only for compatibility with other MCUs\n"
                         "   ( configured by 'm-gen -c' flag )\n"
                         " */\n\n");
 
-        fprintf(outFp, "#define gpio_enableAccess()\n\n");
+        fprintf(outFp, "#define gpio_enableAccess()    do{} while(0)\n\n");
 
         fprintf(outFp, "\n//------------------------------------------------------------------------//\n\n");
 

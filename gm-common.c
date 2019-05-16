@@ -47,7 +47,15 @@ int getActualLine(FILE* fp)
             ++line;
     }
 
-    line -=1;   // why?
+
+    // TODO fix line counter
+    // target module reads file line by line (WITH '\n' ),
+    // NEXT process it - so when processing:
+    // actual line == processed line + 1 (but not always)
+    // so generateMacros() call getActualLine() when position in file is set at next line
+    // BUT when error occur in early stage of processing in target module, it's possible to call getActualLine()
+    // with position in CORRECT line.
+    line -=1;   // <- !!!
 
     return line;
 }
