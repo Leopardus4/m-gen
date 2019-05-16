@@ -146,7 +146,7 @@ int avr_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
                         "   ( configured by 'm-gen -c' flag )\n"
                         " */\n\n");
 
-        fprintf(outFp, "#define gpio_enableAccess()\n\n");
+        fprintf(outFp, "#define gpio_enableAccess()    do{} while(0)\n\n");
 
         fprintf(outFp, "\n//------------------------------------------------------------------------//\n\n");
 

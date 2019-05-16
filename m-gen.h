@@ -137,6 +137,33 @@ Required size of arrays for symbolic pin name and comment from .gm file
 
 
 
+
+
+
+
+/*
+for slow program ha ha
+*/
+#ifdef __WIN32
+  #include <windows.h>
+
+  #define sleep(seconds) Sleep(1000 * (seconds))
+
+#elif defined __unix__
+  #include <unistd.h>
+
+#else
+  #define sleep(seconds)
+        //do nothing
+
+#endif // __WIN32 / __unix__
+
+
+
+
+
+
+
 /*
 Print message to output
     level - predefined macro - see below
@@ -175,24 +202,6 @@ Error - if function pointers are not initialized
 
 
 
-
-
-/*
-for slow program ha ha
-*/
-#ifdef __WIN32
-  #include <windows.h>
-
-  #define sleep(seconds) Sleep(1000 * (seconds))
-
-#elif defined __unix__
-  #include <unistd.h>
-
-#else
-  #define sleep(seconds)
-        //do nothing
-
-#endif // __WIN32 / __unix__
 
 
 
