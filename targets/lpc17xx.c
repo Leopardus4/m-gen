@@ -89,7 +89,7 @@ static MACRO_STRS inlineF = {
 
 
 
-static MACRO_STRS *macroFmt;
+static MACRO_STRS *macroFmt = &macros;
 
 
 /*---------------------------------------------------*/

@@ -296,7 +296,7 @@ int avr_printMacro(FILE* outFp, char mode, char port, char pin, char* name, char
 
 
             if(fls->compatibilityMode == true)  // only if '-c' command line parameter was specified
-                fprintf(outFp, "#define %s_init()\n\n", name);
+                fprintf(outFp, "#define %s_init()       do{} while(0)\n\n", name);
 
 
             fprintf(outFp, "#define %s_dirIn()      do{DDR%c &= ~(1<<P%c%c); PORT%c &= ~(1<<P%c%c);} while(0)\n\n", name, port, port, pin, port, port, pin);

@@ -17,6 +17,20 @@ __But__ if you want to add your improvement to official release:
         In mail with me, please add a tag "[m-gen ~ NEW TARGET]" in the topic.
 
 
+
+---
+
+In m-gen project I prefer following style of code. Please follow it if it's possible - in other case, please inform about variation.
+
+- file encoding: `UTF-8`
+
+- end of line character: `LF` ("line feed", 0b00000000000000000000000000000001010, Unix style)
+
+- spaces (instead of tabs) - 4 characters width
+
+
+
+
 ---
 
 How to add new target:
