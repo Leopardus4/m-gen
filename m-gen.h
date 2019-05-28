@@ -61,8 +61,22 @@ typedef enum{
 #define FILENAME_LENGTH (256)
 
 
+/* Flags for target module */
+
 /*
-Flags for target module
+To add new mode:
+    - create new flag in this structure
+    - initialize with correct value (probably 'false') in main()
+    - create new command line switch:
+        * add description in help()
+        * check if this flag is given by user in readParameters(),
+            and if yes - change value to 'true'
+    - in generateMacros() check if module supports this mode
+        If no, print information for user.
+
+Target modules get following structure in two ways:
+        * first in xx_getData() - module can inform that it supports this mode
+        * and in xx_macroGen() - it should do sth if flag is set
 */
 typedef struct{
 

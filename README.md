@@ -136,9 +136,9 @@ This program is distributed under _GPLv3_ license (see: LICENSE.txt)
 
 - NXP LPC 111x (ARM Cortex M0 based)
 
-- 17xx (not yet)
+- NXP LPC 17xx (Cortex M3)
+
+- STM32 - _TODO ;)_
 
 Cannot find your MCU? Nothing wrong, it's easy to add it. See CONTRIBUTING.md for details.
-
-
 

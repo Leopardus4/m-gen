@@ -301,7 +301,7 @@ void lpc111x_help(void)
            "Other chips (11Cxx, 110x, 112x, ...) has not been tested                \n"
            "and may required some modifications. If you are interested,             \n"
            "it's possible to easy add new module for m-gen. See:                    \n"
-           "    https://github.com/Leopardus4/m-gen/blob/master/CONTRIBUTORS.md     \n"
+           "    https://github.com/Leopardus4/m-gen/blob/master/CONTRIBUTING.md     \n"
            "                                                                        \n"
            );
 }

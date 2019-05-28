@@ -1,8 +1,6 @@
 # TODO
 
-- [ ] LPC 17xx support
-
-- [ ] other MCU's
+- [ ] more MCUs
 
 - [ ] _-f_ flag - creating new .gm file even if it exist
 
@@ -11,8 +9,6 @@
 
 
 ## In future:
-
-- [ ] inline functions
 
 - [ ] support for Doxygen
 
@@ -25,6 +21,15 @@
 
 
 # Changelog
+
+
+## v1.2
+
+- [X] NEW TARGET: __LPC 17xx__ (ARM Cortex M3)
+
+- [X] 'inline' mode ( _--inline_ command line flag) - m-gen can create _static inline_ functions
+
+
 
 
 ## v1.1
