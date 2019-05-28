@@ -398,15 +398,15 @@ static int lpc17xx_printMacro(FILE* outFp, const char mode, unsigned int port, u
             fprintf(outFp, "/* %s - P%d[%d] - active low output \n\t %s */\n\n", name, port, pin, comment);
 
 
-            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
-                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
-
-
             fprintf(outFp, "%s" "%s_On" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
                     macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
 
             fprintf(outFp, "%s" "%s_Off" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
                     macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
 
             break;
 
@@ -417,15 +417,17 @@ static int lpc17xx_printMacro(FILE* outFp, const char mode, unsigned int port, u
             fprintf(outFp, "/* %s - P%d[%d] - active high output \n\t %s */\n\n", name, port, pin, comment);
 
 
-            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
-                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
-
-
             fprintf(outFp, "%s" "%s_On" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
                     macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
 
             fprintf(outFp, "%s" "%s_Off" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
                     macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
+
+
 
             break;
 
