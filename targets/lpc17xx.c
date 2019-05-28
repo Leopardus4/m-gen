@@ -82,8 +82,9 @@ static MACRO_STRS inlineF = {
     .mMid   = "(void) {\n    ",
     .mEnd   = "\n}\n\n",
 
+    /* uint32_t is returned - the fastest type for 32bit CPU */
     .cmBegin = "static inline uint32_t ",
-    .cmMid   = "(void) {\n    return (",
+    .cmMid   = "(void) {\n    return (uint32_t) (",
     .cmEnd   = ");\n}\n\n",
 };
 
@@ -106,7 +107,7 @@ static int lpc17xx_printMacro(FILE* outFp, const char mode, unsigned int port, u
 //return pointers to functions
 void lpc17xx_getData(TARGET_ATTRIBUTES* atrs)
 {
-    char desc[DESCRIPTION_LENGTH] = "NXP LPC17xx series 32-bit ARM Cortex M3 microcontrollers";
+    char desc[DESCRIPTION_LENGTH] = "NXP LPC175x & 176x series 32-bit ARM Cortex M3 microcontrollers";
 
     strncpy(atrs->description, desc, DESCRIPTION_LENGTH);
 
@@ -196,7 +197,8 @@ int  lpc17xx_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
                         "   ( configured by 'm-gen -c' flag )\n"
                         " */\n\n");
 
-        fprintf(outFp, "#define gpio_enableAccess()    do{} while(0)\n\n");
+        fprintf(outFp, "%s" "gpio_enableAccess" "%s" "%s",
+                macroFmt->mBegin, macroFmt->mMid, macroFmt->mEnd);
 
         fprintf(outFp, "\n//------------------------------------------------------------------------//\n\n");
     }
@@ -251,14 +253,14 @@ int  lpc17xx_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
         mode[0] = tolower(mode[0]);
 
 
-        if(port < 0 )
+        if(port < 0 || port > 4)
         {
             message(ERR, "Bad PORT: %d\n", port);
             return -1;
         }
 
 
-        if(pin < 0 )
+        if(pin < 0 || pin > 31)
         {
             message(ERR, "Bad PIN: %c\n", pin);
             return -1;
@@ -272,6 +274,10 @@ int  lpc17xx_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
         //creating set of macros for 1 gpio
         if(lpc17xx_printMacro(outFp, mode[0], port, pin, name, comment) != 0)
             return -1;
+
+
+
+        macrosNum++;
 
 
     } while(1);
@@ -289,18 +295,154 @@ int  lpc17xx_generateMacros(FILE* inFp, FILE* outFp, const TARGET_FLAGS* fls)
 static int lpc17xx_printMacro(FILE* outFp, const char mode, unsigned int port, unsigned int pin, const char* name, const char* comment)
 {
 
+    char disablePullUp[128];
+    char enablePullUp[128];
+
+    // Every pin has two bits in PINMODE register,
+    // so there is 10 PINMODE registers (instead of 5).
+    // It needs to be processed by m-gen:
+    if(pin>15)
+    {
+        snprintf(disablePullUp, 128, "LPC_PINCON->PINMODE%d |= (0x2 << %d)", (port*2 + 1), ((pin-16) * 2) );
+
+        snprintf(enablePullUp, 128, "LPC_PINCON->PINMODE%d &= ~(0x2 << %d)", (port*2 + 1), ((pin-16) * 2) );
+    }
+
+    else
+    {
+        snprintf(disablePullUp, 128, "LPC_PINCON->PINMODE%d |= (0x2 << %d)", (port*2), (pin*2) );
+
+        snprintf(enablePullUp, 128, "LPC_PINCON->PINMODE%d &= ~(0x2 << %d)", (port*2), (pin*2) );
+    }
+
+
+
+
+
     switch(mode)
     {
         case 'i':   //Digital input
 
             fprintf(outFp, "/* %s - P%d[%d] - digital input \n\t %s */\n\n", name, port, pin, comment);
 
-            fprintf(outFp, "%s" "%s_dirIn" "%s" "/*instr;*/" "%s", macroFmt->mBegin, name, macroFmt->mMid, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_dirIn" "%s" "LPC_GPIO%d->FIODIR &= ~(1<<%d); %s;" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, macroFmt->mEnd);
 
 
-            // fprintf(outFp, "#define %s_isHigh()     ((LPC_GPIO%d->DATA & (1<<%d)) != 0)\n\n", name, port, pin);
+            fprintf(outFp, "%s" "%s_isHigh" "%s" "LPC_GPIO%d->FIOPIN & (1<<%d)" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
 
-            // fprintf(outFp, "#define %s_isLow()      ((LPC_GPIO%d->DATA & (1<<%d)) == 0)\n\n", name, port, pin);
+            fprintf(outFp, "%s" "%s_isLow" "%s" "(LPC_GPIO%d->FIOPIN & (1<<%d)) == 0" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
+
+            break;
+
+
+
+
+        case 'o':   //Digital output
+
+            fprintf(outFp, "/* %s - P%d[%d] - digital output \n\t %s */\n\n", name, port, pin, comment);
+
+
+            fprintf(outFp, "%s" "%s_dirOut" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s;" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_setHigh" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_setLow" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            break;
+
+
+
+
+        case 'd':   //Input and output
+
+            fprintf(outFp, "/* %s - P%d[%d] - digital input and output \n\t %s */\n\n", name, port, pin, comment);
+
+            fprintf(outFp, "%s" "%s_init" "%s" "%s;" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, disablePullUp, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_dirIn" "%s" "LPC_GPIO%d->FIODIR &= ~(1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_dirOut" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_isHigh" "%s" "LPC_GPIO%d->FIOPIN & (1<<%d)" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
+
+            fprintf(outFp, "%s" "%s_isLow" "%s" "(LPC_GPIO%d->FIOPIN & (1<<%d)) == 0" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
+
+
+            fprintf(outFp, "%s" "%s_setHigh" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_setLow" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            break;
+
+
+
+        case 'l':   //Active low output
+
+            fprintf(outFp, "/* %s - P%d[%d] - active low output \n\t %s */\n\n", name, port, pin, comment);
+
+
+            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_On" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_Off" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            break;
+
+
+
+        case 'h':   //Active high output
+
+            fprintf(outFp, "/* %s - P%d[%d] - active high output \n\t %s */\n\n", name, port, pin, comment);
+
+
+            fprintf(outFp, "%s" "%s_asOutput" "%s" "LPC_GPIO%d->FIODIR |= (1<<%d); %s; %s_Off();" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, disablePullUp, name, macroFmt->mEnd);
+
+
+            fprintf(outFp, "%s" "%s_On" "%s" "LPC_GPIO%d->FIOSET = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_Off" "%s" "LPC_GPIO%d->FIOCLR = (1<<%d);" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, macroFmt->mEnd);
+
+            break;
+
+
+
+        case 'b':   //Button type - active low input with internall pull-up
+
+            fprintf(outFp, "/* %s - P%d[%d] - active low input with internal pull-up resistor \n\t %s */\n\n", name, port, pin, comment);
+
+            fprintf(outFp, "%s" "%s_asInput" "%s" "LPC_GPIO%d->FIODIR &= ~(1<<%d); %s;" "%s",
+                    macroFmt->mBegin, name, macroFmt->mMid, port, pin, enablePullUp, macroFmt->mEnd);
+
+            fprintf(outFp, "%s" "%s_isActive" "%s" "(LPC_GPIO%d->FIOPIN & (1<<%d)) == 0" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
+
+            fprintf(outFp, "%s" "%s_isInactive" "%s" "LPC_GPIO%d->FIOPIN & (1<<%d)" "%s",
+                    macroFmt->cmBegin, name, macroFmt->cmMid, port, pin, macroFmt->cmEnd);
 
             break;
 
@@ -333,9 +475,9 @@ void lpc17xx_help(void)
            "This module doesn't check if you use valid pin                          \n"
            "- it must be checked in part datasheet / user manual.                   \n"
            "                                                                        \n"
-           "LPC177x & 178x series are not supported.                                \n"
-           "If you are interested, it's possible to easy add new module for m-gen.  \n"
-           "See: https://github.com/Leopardus4/m-gen/blob/master/CONTRIBUTORS.md    \n"
+           "LPC177x & 178x series are not supported, BUT                            \n"
+           "if you are interested, it's possible to easy add new module for m-gen.  \n"
+           "See: https://github.com/Leopardus4/m-gen/blob/master/CONTRIBUTING.md    \n"
            "                                                                        \n"
            );
 }
